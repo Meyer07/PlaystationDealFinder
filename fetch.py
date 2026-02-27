@@ -1,43 +1,62 @@
-import requests
-from bs4 import BeautifulSoup
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from configure import max_deals
 
 def fetchPsDeals() -> list[dict]:
-    url = "https://www.dekudeals.com/ps-deals"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-    }
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     try:
-        resp = requests.get(url, headers=headers, timeout=15)
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "lxml")
+        driver.get("https://www.dekudeals.com/ps-deals")
+        time.sleep(8)
 
-        deals = []
-        items = soup.select(".main-card")[:max_deals]
+        # Use JavaScript to extract all deal data at once
+        deals_data = driver.execute_script("""
+            const cards = document.querySelectorAll('.col.d-block');
+            const results = [];
+            cards.forEach(card => {
+                const titleEl    = card.querySelector('a.main-link h6');
+                const linkEl     = card.querySelector('a.main-link');
+                const priceEl    = card.querySelector('strong');
+                const originalEl = card.querySelector('s.text-muted');
+                const discountEl = card.querySelector('span.badge-danger');
+                if (titleEl && priceEl) {
+                    results.push({
+                        name:     titleEl.innerText.trim(),
+                        url:      linkEl ? linkEl.href : '',
+                        price:    priceEl.innerText.trim(),
+                        original: originalEl ? originalEl.innerText.trim() : 'N/A',
+                        discount: discountEl ? discountEl.innerText.trim().replace('%','').replace('-','') : '?'
+                    });
+                }
+            });
+            return results;
+        """)
 
-        for item in items:
-            title      = item.select_one(".name")
-            sale_price = item.select_one(".sale-price")
-            original   = item.select_one(".original-price")
-            discount   = item.select_one(".discount-badge")
-            link       = item.select_one("a")
-
-            deals.append({
-                "name":          title.text.strip()      if title      else "Unknown",
-                "sale_price":    sale_price.text.strip() if sale_price else "N/A",
-                "regular_price": original.text.strip()   if original   else "N/A",
-                "discount":      discount.text.strip().replace("%","").replace("-","") if discount else "?",
-                "url":           "https://www.dekudeals.com" + link["href"] if link else "",
-                "platforms":     ["PS"],
-                "sale_end_date": "",
-            })
+        deals = [{
+            "name":          d["name"],
+            "sale_price":    d["price"],
+            "regular_price": d["original"],
+            "discount":      d["discount"],
+            "url":           d["url"],
+            "platforms":     ["PS"],
+            "sale_end_date": "",
+        } for d in deals_data[:max_deals]]
 
         print(f"[✓] Fetched {len(deals)} deals from DekuDeals.")
         return deals
 
-    except requests.RequestException as e:
-        print(f"Error in fetching deals: {e}")
+    except Exception as e:
+        print(f"Error fetching deals: {e}")
         return []
+
+    finally:
+        driver.quit()

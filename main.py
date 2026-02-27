@@ -3,7 +3,7 @@ from fetch import fetchPsDeals
 from dealFormatter import formatDeals
 from emailSender import sendEmail
 from smsSender import sendSms
-from wishlistFilter import filterWishlistDeals
+from wishListFilter import filterWishlistDeals
 from configure import WISHLIST
 
 def main():
