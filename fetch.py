@@ -15,7 +15,7 @@ def fetchPsDeals() -> list[dict]:
 
 
     try:
-        resp=requests.get(url,params=params,headers=headers,timeout=15)
+        resp=requests.get(url,params=parameters,headers=headers,timeout=15)
         resp.raise_for_status()
         data=resp.json()
         deals = data.get("data", {}).get("collection", [])

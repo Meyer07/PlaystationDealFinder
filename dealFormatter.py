@@ -31,7 +31,7 @@ def formatDeals(deals: list[dict]) -> tuple[str, str]:
             f"   {url}"
         )
 
-        plain_text = "\n".join(plainLines)
+    plain_text = "\n".join(plainLines)
 
     
 

@@ -18,7 +18,7 @@ def sendEmail(plain_text: str, html: str, deal_count: int):
     msg.attach(MIMEText(html,       "html"))
 
     try:
-        with smtplib.SMTP("smtp-mail.outlook.com", 587) as server:
+        with smtplib.SMTP("mail.twc.com", 587) as server:
             server.ehlo()
             server.starttls()
             server.login(ROADRUNNER_EMAIL, ROADRUNNER_PASSWORD)
