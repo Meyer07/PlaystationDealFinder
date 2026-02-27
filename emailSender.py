@@ -22,7 +22,7 @@ def sendEmail(plain_text: str, html: str, deal_count: int):
             server.ehlo()
             server.starttls()
             server.login(ROADRUNNER_EMAIL, ROADRUNNER_PASSWORD)
-            server.sendmail(ROADRUNNER_EMAIL, TO_EMAILs, msg.as_string())
+            server.sendmail(ROADRUNNER_EMAIL, TO_EMAILS, msg.as_string())
         print(f"[✓] Email sent to {TO_EMAILS}")
     except Exception as e:
         print(f"[ERROR] Email failed: {e}")
