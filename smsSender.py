@@ -1,12 +1,11 @@
-from twilio.rest import Client
-from configure import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, YOUR_PHONE_NUMBER
-
+import requests
+from configure import PUSHOVER_USER_TOKEN, PUSHOVER_API_TOKEN
 
 def sendSms(deals: list[dict]):
     if not deals:
-        body = "No deals found today"
+        body = "🎮 PS Store Deals: No wishlist games on sale today."
     else:
-        top = deals[:3]
+        top   = deals[:3]
         lines = ["🎮 PS Store Deals Today:"]
         for d in top:
             lines.append(
@@ -16,13 +15,17 @@ def sendSms(deals: list[dict]):
             lines.append(f"...and {len(deals) - 3} more. Check your email!")
         body = "\n".join(lines)
 
-    try:  # <-- this should be outside and after the if/else
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-        message = client.messages.create(
-            body=body,
-            from_=TWILIO_FROM_NUMBER,
-            to=YOUR_PHONE_NUMBER,
-        )
-        print(f"[✓] SMS sent (SID: {message.sid})")
+    try:
+        resp = requests.post("https://api.pushover.net/1/messages.json", data={
+            "token":   PUSHOVER_API_TOKEN,
+            "user":    PUSHOVER_USER_TOKEN,
+            "title":   "PlayStation Store Deals",
+            "message": body,
+            "url":     deals[0].get("url", "") if deals else "",
+            "url_title": "View on DekuDeals" if deals else "",
+            "sound":   "cashregister"
+        })
+        resp.raise_for_status()
+        print(f"[✓] Pushover notification sent.")
     except Exception as e:
-        print(f"[ERROR] SMS failed: {e}")
+        print(f"[ERROR] Pushover failed: {e}")
