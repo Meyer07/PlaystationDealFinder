@@ -1,16 +1,19 @@
 from datetime import datetime
 
 
-
-today = datetime.now().strftime("%B %d, %Y")
+def formatDeals(deals: list[dict]) -> tuple[str, str]:
+    
+    today = datetime.now().strftime("%B %d, %Y")
 
     if not deals:
-        plain = "No PlayStation Store deals found today."
+        plain ="No Deals were found today"
         html  = f"<html><body><p>No deals found on {today}.</p></body></html>"
-        return plain, html
+        return plain, html 
+    
 
-    # ── Plain Text ─────────────────────────────────────────
-    plain_lines = [f"PlayStation Store Deals — {today}", "=" * 50]
+
+    plainLines=[f"Playstation Store Deals-{today},","="*50]
+
 
     for d in deals:
         title      = d.get("name", "Unknown Title")
@@ -21,16 +24,19 @@ today = datetime.now().strftime("%B %d, %Y")
         end_date   = d.get("sale_end_date", "")[:10] if d.get("sale_end_date") else "N/A"
         url        = d.get("url", "")
 
-        plain_lines.append(
+        plainLines.append(
             f"\n🎮 {title} [{platform}]\n"
             f"   {original} → {sale_price}  ({discount}% OFF)\n"
             f"   Sale ends: {end_date}\n"
             f"   {url}"
         )
 
-    plain_text = "\n".join(plain_lines)
+        plain_text = "\n".join(plainLines)
 
-    # ── HTML ───────────────────────────────────────────────
+    
+
+    #html code now for more specific formatting
+
     rows = []
     for d in deals:
         title      = d.get("name", "Unknown Title")
@@ -86,4 +92,5 @@ today = datetime.now().strftime("%B %d, %Y")
       </div>
     </html></body>
     """
+
     return plain_text, html
