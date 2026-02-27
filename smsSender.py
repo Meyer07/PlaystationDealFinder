@@ -2,7 +2,7 @@ from twilio.rest import Client
 from configure import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, YOUR_PHONE_NUMBER
 
 
-def send_sms(deals: list[dict]):
+def sendSms(deals: list[dict]):
     if not deals:
         body="No deals found today"
 

@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
-from configure import GMAIL_EMAIL, GMAIL_PASSWORD, TO_EMAIL
+from configure import ROADRUNNER_EMAIL, ROADRUNNER_PASSWORD, TO_EMAILS
 
 
 def sendEmail(plain_text: str, html: str, deal_count: int):
@@ -11,8 +11,8 @@ def sendEmail(plain_text: str, html: str, deal_count: int):
 
     msg            = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = GMAIL_EMAIL
-    msg["To"]      = TO_EMAIL
+    msg["From"]    = ROADRUNNER_EMAIL
+    msg["To"]      = TO_EMAILS
 
     msg.attach(MIMEText(plain_text, "plain"))
     msg.attach(MIMEText(html,       "html"))
@@ -21,8 +21,8 @@ def sendEmail(plain_text: str, html: str, deal_count: int):
         with smtplib.SMTP("smtp-mail.outlook.com", 587) as server:
             server.ehlo()
             server.starttls()
-            server.login(GMAIL_EMAIL, GMAIL_PASSWORD)
-            server.sendmail(GMAIL_EMAIL, TO_EMAIL, msg.as_string())
-        print(f"[✓] Email sent to {TO_EMAIL}")
+            server.login(ROADRUNNER_EMAIL, ROADRUNNER_PASSWORD)
+            server.sendmail(ROADRUNNER_EMAIL, TO_EMAILs, msg.as_string())
+        print(f"[✓] Email sent to {TO_EMAILS}")
     except Exception as e:
         print(f"[ERROR] Email failed: {e}")
